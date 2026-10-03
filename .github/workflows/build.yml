@@ -9,6 +9,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Injecter la clé API
+        run: |
+          sed -i '' "s/__FINNHUB_KEY__/${{ secrets.FINNHUB_KEY }}/" Sources/Config.swift
+
       - name: Installer XcodeGen
         run: brew install xcodegen
 
