@@ -1,0 +1,33 @@
+name: Build IPA
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer XcodeGen
+        run: brew install xcodegen
+
+      - name: Générer le projet Xcode
+        run: xcodegen generate
+
+      - name: Compiler sans signature
+        run: |
+          xcodebuild -project TestApp.xcodeproj -scheme TestApp \
+            -configuration Release -sdk iphoneos -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Créer l'IPA
+        run: |
+          mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/TestApp.app Payload/
+          zip -r TestApp.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TestApp-ipa
+          path: TestApp.ipa
